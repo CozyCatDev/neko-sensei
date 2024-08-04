@@ -23,11 +23,11 @@ Different animations will be displayed on screen depending on whether the questi
 
 ### Speaker
 - [ ] Test speaker w/o LM386 audio amplifier, sound might be loud enough w/o amplifier.
-- [ ] Play different sound files when answering correctly/incorrectly.
-- [ ] Play victory/defeat sound effect at end of quiz depending on score.
+- [x] Play different sound files when answering correctly/incorrectly.
+- [x] Play victory/defeat sound effect at end of quiz depending on score.
 
 ### Servo
-- [ ] ...
+- [x] Control servo to give out prizes if score meets threshold value.
 
 ### 3D Model
 - [ ] ...

@@ -9,10 +9,21 @@
 // pin declarations
 #define SDA 21
 #define SCL 22
+#define DAC 25
+#define SERVO 18
 #define BUTTON_A 12
 #define BUTTON_B 13
 #define BUTTON_C 14
 #define BUTTON_D 16
+
+// audio sample rate is 8kHz
+#define SAMPLE_RATE 8000
+
+// timer ISR interval
+#define TIMER_INTERVAL (1000000 / SAMPLE_RATE)
+
+// time between servo actions in milliseconds
+#define SERVO_INTERVAL 2000
 
 // small font size dimensions
 #define SMALL_CHAR_WIDTH 5

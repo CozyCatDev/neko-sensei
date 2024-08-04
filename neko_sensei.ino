@@ -46,13 +46,18 @@
 
 // include Arduino libraries
 #include <Arduino.h>
+#include <pgmspace.h>
+#include <driver/dac.h>
+#include <driver/timer.h>
 #include <Wire.h>
 #include <U8g2lib.h>
+#include <ESP32Servo.h>
 
 // include created header files
 #include "macros.h"
 #include "typedefs.h"
 #include "frames.h"
+#include "sound_effects.h"
 #include "util.h"
 #include "oled_control.h"
 
@@ -66,10 +71,6 @@ char buttonPressed;
 int questionCounter = 0;
 // keep track of score
 int scoreCounter = 0;
-// keep track of time passed since last state change
-unsigned long lastDebounceTimer = 0;
-// check if state has changed after some delay
-int debounceDelay = 0;
 
 // create u8g2 object for SSD1306 I2C display
 // '1' stands for page screen buffer which saves more RAM
@@ -132,17 +133,22 @@ int freeRam() {
     ? (int)&__heap_start : (int) __brkval);  
 }
 */
+
 void setup() {
   // declare all button pins as input with pullup resistor enabled
   pinMode(BUTTON_A, INPUT_PULLUP);
   pinMode(BUTTON_B, INPUT_PULLUP);
   pinMode(BUTTON_C, INPUT_PULLUP);
   pinMode(BUTTON_D, INPUT_PULLUP);
+  
+  setupTimerDACServo();
+
   #ifdef DEMO_MODE
   // ensure random() is different each time the sketch runs
   randomSeed(analogRead(0));
   #endif
-  Serial.begin(9600);
+  Serial.begin(115200);
+  
   // initialize display
   u8g2.begin();
   // set current screen to start screen
@@ -188,10 +194,12 @@ void loop() {
     questionCounter++;
   }
   else if(currentScreen == CORRECT){
+    playSoundEffect(currentScreen);
     // show animated correct screen if currentScreen == CORRECT
     showAnimatedScreen(u8g2, correctScreenFrames, correctScreenLen, false);
   }
   else if(currentScreen == WRONG){
+    playSoundEffect(currentScreen);
     // currently prints "Wrong...", no animated screen implemented due to insufficient RAM
     showAnimatedScreen(u8g2, wrongScreenFrames, wrongScreenLen, false);
     // code below used for Arduino since it doesn't have enough RAM
@@ -206,6 +214,7 @@ void loop() {
     //showAnimatedScreen(u8g2, wrongScreenFrames, wrongScreenLen, false);
   }
   else if(currentScreen == SCORE){
+    playScoreEffects(scoreCounter);
     // show final score if currentScreen == SCORE
     showScoreScreen(u8g2, scoreCounter);
     // reset scoreCounter after quiz ends

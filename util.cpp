@@ -214,7 +214,11 @@ void setupTimerDACServo(){
 void playSoundEffect(Screen currentScreen){
   playSound = true;
   controlServo = false;
-  if(currentScreen == CORRECT){
+  if(currentScreen == QUESTION){
+    currentSoundBytes = questionSoundBytes;
+    currentSoundLength = questionSoundLength;
+  }
+  else if(currentScreen == CORRECT){
     currentSoundBytes = correctSoundBytes;
     currentSoundLength = correctSoundLength;
   }else if(currentScreen == WRONG){

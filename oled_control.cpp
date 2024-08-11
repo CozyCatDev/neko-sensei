@@ -40,27 +40,29 @@ void showQuestionScreen(U8G2_SSD1309_128X64_NONAME0_1_HW_I2C u8g2, Question ques
   u8g2.setFont(u8g2_font_spleen5x8_mf);
   // wait for NEXT_SCREEN_DELAY seconds
   delay(NEXT_SCREEN_DELAY);
+  unsigned long questionTimer = millis();
   // show question along with options
-  u8g2.firstPage();
-  do{
-    int cursorX = 0;
-    int cursorY = 0;
-    // show question lines that can fit onto the screen
-    for (int i = 0; i < MAX_QUESTION_LINES; i++){
-      if (strlen(lines[i]) > 1){
-        u8g2.drawStr(cursorX, cursorY, lines[i]);
-        cursorY += LINE_HEIGHT;
+  while(millis() - questionTimer < QUESTION_DURATION && !getButtonPressed()){
+    int progressBarPixels = round(((millis() - questionTimer) * SCREEN_WIDTH) / QUESTION_DURATION);
+    u8g2.firstPage();
+    do{
+      int cursorX = 0;
+      int cursorY = 0;
+      // show question lines that can fit onto the screen
+      for (int i = 0; i < MAX_QUESTION_LINES; i++){
+        Serial.println(strlen(lines[i]));
+        if (strlen(lines[i]) > 0){
+          u8g2.drawStr(cursorX, cursorY, lines[i]);
+          cursorY += LINE_HEIGHT;
+        }
       }
-    }
-    u8g2.drawStr(cursorX, cursorY + OPTIONS_Y_GAP, question.options[0]);
-    u8g2.drawStr(cursorX + 64, cursorY + OPTIONS_Y_GAP, question.options[1]);
-    u8g2.drawStr(cursorX, cursorY + LINE_HEIGHT + OPTIONS_Y_GAP, question.options[2]);
-    u8g2.drawStr(cursorX + 64, cursorY + LINE_HEIGHT + OPTIONS_Y_GAP, question.options[3]);
-  }while(u8g2.nextPage());
-  // keep showing question screen while no button is pressed
-  #ifndef DEMO_MODE
-  while(!getButtonPressed());
-  #endif
+      u8g2.drawStr(cursorX, cursorY + QUESTIONS_OPTIONS_GAP, question.options[0]);
+      u8g2.drawStr(cursorX + 64, cursorY + QUESTIONS_OPTIONS_GAP, question.options[1]);
+      u8g2.drawStr(cursorX, cursorY + LINE_HEIGHT + OPTIONS_GAP, question.options[2]);
+      u8g2.drawStr(cursorX + 64, cursorY + LINE_HEIGHT + OPTIONS_GAP, question.options[3]);
+      u8g2.drawBox(0, SCREEN_HEIGHT - PROGRESS_BAR_HEIGHT, progressBarPixels, PROGRESS_BAR_HEIGHT);
+    }while(u8g2.nextPage());
+  }
 }
 
 // show final score

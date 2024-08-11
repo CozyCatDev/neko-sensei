@@ -4,23 +4,24 @@
 #include <Arduino.h>
 
 // uncomment code below to enable demo mode
-#define DEMO_MODE
+//#define DEMO_MODE
 
 // pin declarations
 #define SDA 21
 #define SCL 22
 #define DAC 25
 #define SERVO 18
-#define BUTTON_A 12
-#define BUTTON_B 13
-#define BUTTON_C 14
-#define BUTTON_D 16
+#define BUTTON_A 16
+#define BUTTON_B 17
+#define BUTTON_C 5
+#define BUTTON_D 19
 
 // audio sample rate is 8kHz
 #define SAMPLE_RATE 8000
 
 // timer ISR interval
 #define TIMER_INTERVAL (1000000 / SAMPLE_RATE)
+#define BACKGROUND_TIMER_INTERVAL 100000
 
 // time between servo actions in milliseconds
 #define SERVO_INTERVAL 2000
@@ -34,6 +35,9 @@
 // screen dimensions
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+// progress bar dimensions
+#define PROGRESS_BAR_HEIGHT 2
+
 
 // use constants below when need to explicitly set reset pin and I2C address of screen
 // not currently used since U8G2 finds the address for us
@@ -44,9 +48,15 @@
 #define FRAME_DELAY 150
 // time to wait until next screen
 #define NEXT_SCREEN_DELAY 4000
+// time allowed per question
+#ifdef DEMO_MODE
+#define QUESTION_DURATION 4000
+#else
+#define QUESTION_DURATION 40000
+#endif
 
 // maximum no. of lines question text can have
-#define MAX_QUESTION_LINES 4
+#define MAX_QUESTION_LINES 3
 // maximum characters each question line can have
 #define MAX_QUESTION_LINE_LENGTH 30
 // maximum pixel width each question line can have
@@ -58,7 +68,9 @@
 #define QUIZ_LENGTH 5
 // height of each line
 #define LINE_HEIGHT 12
+// gap between questions and options
+#define QUESTIONS_OPTIONS_GAP 2
 // slight y-offset for question options
-#define OPTIONS_Y_GAP 6
+#define OPTIONS_GAP 3
 
 #endif

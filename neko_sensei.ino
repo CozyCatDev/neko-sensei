@@ -177,6 +177,7 @@ void loop() {
     #endif
   }
   else if(currentScreen == QUESTION){
+    playSoundEffect(currentScreen);
     // show question screen if currentScreen == QUESTION
     showQuestionScreen(u8g2, questions[questionCounter]);
     #ifdef DEMO_MODE

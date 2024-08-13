@@ -99,6 +99,20 @@ Question questions[QUESTION_POOL_LENGTH] = {
   },
   {
     "Circuit Theory",
+    "<Easy>",
+    "If voltage is 12V and current is 6A, what is the power?",
+    {"A. 72W","B. 18W","C. 32W","D. 2W"},
+    'A'
+  },
+  {
+    "Circuit Theory",
+    "<Easy>",
+    "What does an ammeter measure?",
+    {"A. Current", "B. Voltage", "C. Reactance", "D. Power"},
+    'A'
+  },
+  {
+    "Circuit Theory",
     "<Medium>",
     "What stores energy in a magnetic field?",
     {"A. Resistor","B. Capacitor","C. Diode","D. Inductor"},
@@ -112,16 +126,51 @@ Question questions[QUESTION_POOL_LENGTH] = {
     'B'
   },
   {
+    "General",
+    "<Medium>",
+    "What level of supply voltage does Malaysia use?",
+    {"A. 120V,60Hz","B. 240V,60Hz","C. 100V,60Hz","D. 240V,50Hz"},
+    'D'
+  },
+  {
+    "Programming",
+    "<Medium>",
+    "How many bits does 3 bytes represent?",
+    {"A. 18","B. 24","C. 36","D. 48"},
+    'B'
+  },
+  {
+    "Logic",
+    "<Medium>",
+    "What type of signal is used in digital electronics?",
+    {"A. Analog", "B. Sine wave", "C. Binary", "D. Sawtooth"},
+    'C'
+  },
+  {
     "Logic",
     "<Hard>",
     "What is the hexadecimal representation of 38?",
     {"A. 0x26", "B. 0x22", "C. 0x12", "D. 0xC0"},
     'A'
+  },
+  {
+    "Transformers",
+    "<Hard>",
+    "Input is 1200V. Turn ratio is 5:1. What is the output?",
+    {"A. 360V", "B. 300V", "C. 480V", "D. 240V"},
+    'D'
+  },
+  {
+    "Logic",
+    "<Hard>",
+    "If A = 1011, B = 0101, what is A XOR B?",
+    {"A. 1111", "B. 0000", "C. 1110", "D. 0001"},
+    'C'
   }
 };
 
 // random questions [NOT IMPLEMENTED YET]
-//Question randomQuestions[QUIZ_LENGTH];
+Question randomQuestions[QUIZ_LENGTH];
 
 // returns amount of free RAM (not accurate?)
 // source: https://docs.arduino.cc/learn/programming/memory-guide/
@@ -157,7 +206,7 @@ void setup() {
   u8g2.setFontPosTop();
   // set font family and font size, character has width of 5 and height of 8
   u8g2.setFont(u8g2_font_spleen5x8_mf);
-  //getRandomQuestions(questions, randomQuestions);
+  getRandomQuestions(questions, randomQuestions);
 }
 
 // PROGRAM FLOW:
@@ -179,7 +228,7 @@ void loop() {
   else if(currentScreen == QUESTION){
     playSoundEffect(currentScreen);
     // show question screen if currentScreen == QUESTION
-    showQuestionScreen(u8g2, questions[questionCounter]);
+    showQuestionScreen(u8g2, randomQuestions[questionCounter]);
     #ifdef DEMO_MODE
     // randomly show correct or wrong screen
     correctAnswer = random(0, 2) == 0 ? true : false;
@@ -188,7 +237,7 @@ void loop() {
     // get button after debouncing it
     buttonPressed = getDebouncedButton();
     // check if answer chosen is correct, update score and check if last question accordingly
-    correctAnswer = buttonPressed == questions[questionCounter].answer;
+    correctAnswer = buttonPressed == randomQuestions[questionCounter].answer;
     #endif
     scoreCounter = correctAnswer ? scoreCounter + 1 : scoreCounter;
     lastQuestion = questionCounter == QUIZ_LENGTH - 1;
@@ -224,6 +273,7 @@ void loop() {
     questionCounter = 0;
     // show score screen for NEXT_SCREEN_DELAY seconds
     delay(NEXT_SCREEN_DELAY);
+    getRandomQuestions(questions, randomQuestions);
   }
   // move on to next screen
   currentScreen = nextScreen(currentScreen, correctAnswer, lastQuestion);

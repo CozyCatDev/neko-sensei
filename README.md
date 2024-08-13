@@ -18,7 +18,8 @@ Different animations will be displayed on screen depending on whether the questi
 - [x] Show different animations when answering correctly/incorrectly.
 - [x] Show final score at the end of each quiz.
 - [x] Restart a new quiz after each quiz.
-- [ ] Each new quiz chooses 5 questions randomly from the question pool.
+- [x] Each new quiz chooses 5 questions randomly from the question pool.
+- [x] Questions in a new quiz attempt must be different from those of the previous one.
 - [ ] Show victory/defeat animation at end of quiz depending on score.
 
 ### Speaker

@@ -43,14 +43,14 @@ void showQuestionScreen(U8G2_SSD1309_128X64_NONAME0_1_HW_I2C u8g2, Question ques
   unsigned long questionTimer = millis();
   // show question along with options
   while(millis() - questionTimer < QUESTION_DURATION && !getButtonPressed()){
-    int progressBarPixels = round(((millis() - questionTimer) * SCREEN_WIDTH) / QUESTION_DURATION);
+    int timeLeft = round((QUESTION_DURATION - (millis() - questionTimer)) / 1000);
+    int progressBarPixels = round(((millis() - questionTimer) * PROGRESS_BAR_WIDTH) / QUESTION_DURATION);
     u8g2.firstPage();
     do{
       int cursorX = 0;
       int cursorY = 0;
       // show question lines that can fit onto the screen
       for (int i = 0; i < MAX_QUESTION_LINES; i++){
-        Serial.println(strlen(lines[i]));
         if (strlen(lines[i]) > 0){
           u8g2.drawStr(cursorX, cursorY, lines[i]);
           cursorY += LINE_HEIGHT;
@@ -60,6 +60,8 @@ void showQuestionScreen(U8G2_SSD1309_128X64_NONAME0_1_HW_I2C u8g2, Question ques
       u8g2.drawStr(cursorX + 64, cursorY + QUESTIONS_OPTIONS_GAP, question.options[1]);
       u8g2.drawStr(cursorX, cursorY + LINE_HEIGHT + OPTIONS_GAP, question.options[2]);
       u8g2.drawStr(cursorX + 64, cursorY + LINE_HEIGHT + OPTIONS_GAP, question.options[3]);
+      u8g2.setCursor(SCREEN_WIDTH - (timeLeft < 10 ? 1 : 2) * SMALL_CHAR_WIDTH, SCREEN_HEIGHT - SMALL_CHAR_HEIGHT);
+      u8g2.print(String(timeLeft));
       u8g2.drawBox(0, SCREEN_HEIGHT - PROGRESS_BAR_HEIGHT, progressBarPixels, PROGRESS_BAR_HEIGHT);
     }while(u8g2.nextPage());
   }

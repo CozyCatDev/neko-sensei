@@ -4,6 +4,7 @@
 hw_timer_t* timer = NULL;
 // index for keeping track of sound byte being played
 volatile int soundIdx = 0;
+volatile uint32_t songIdx = 0;
 volatile const uint8_t* currentSoundBytes = nullptr;
 volatile unsigned int currentSoundLength = 0;
 
@@ -174,7 +175,7 @@ void getRandomQuestions(Question questionPool[QUESTION_POOL_LENGTH], Question ra
   numQuiz++;
 }
 
-void IRAM_ATTR onTimer(void* arg){
+void IRAM_ATTR soundEffectsISR(void* arg){
   // Clear the interrupt status
   timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
   
@@ -216,6 +217,17 @@ void IRAM_ATTR onTimer(void* arg){
   }
 }
 
+void IRAM_ATTR songISR(void* arg){
+    // Clear the interrupt status
+    timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_1);
+    
+    // Enable the alarm for the next period
+    timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_1);
+    uint8_t sample = pgm_read_byte(&startSoundBytes[songIdx]);
+    dac_output_voltage(DAC_CHANNEL_1, sample);
+    songIdx = (songIdx + 1) % startSoundLength;
+}
+
 void setupTimerDACServo(){
   dac_output_enable(DAC_CHANNEL_1);
 
@@ -223,7 +235,7 @@ void setupTimerDACServo(){
   servo.write(0);
 
   // Configure the timer
-  timer_config_t config = {
+  timer_config_t soundEffectsConfig = {
     .alarm_en = TIMER_ALARM_EN,         // Enable the alarm
     .counter_en = TIMER_PAUSE,          // Start with the timer paused
     .intr_type = TIMER_INTR_LEVEL,      // Use level interrupt
@@ -233,44 +245,59 @@ void setupTimerDACServo(){
   };
 
   // Initialize the timer
-  timer_init(TIMER_GROUP_0, TIMER_0, &config);
+  timer_init(TIMER_GROUP_0, TIMER_0, &soundEffectsConfig);
   
   // Set the counter value to 0
   timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
   
   // Set the alarm value for the sample rate
-  timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, TIMER_INTERVAL);
+  timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, SOUND_EFFECTS_INTERVAL);
   
   // Enable the timer interrupt
   timer_enable_intr(TIMER_GROUP_0, TIMER_0);
   
   // Attach the ISR to the timer
-  timer_isr_register(TIMER_GROUP_0, TIMER_0, onTimer, NULL, ESP_INTR_FLAG_IRAM, NULL);
+  timer_isr_register(TIMER_GROUP_0, TIMER_0, soundEffectsISR, NULL, ESP_INTR_FLAG_IRAM, NULL);
   
   // Do not start the timer here; start it based on the button press
+
+  timer_config_t songConfig = {
+    .alarm_en = TIMER_ALARM_EN,         // Enable the alarm
+    .counter_en = TIMER_PAUSE,          // Start with the timer paused
+    .intr_type = TIMER_INTR_LEVEL,      // Use level interrupt
+    .counter_dir = TIMER_COUNT_UP,      // Count up
+    .auto_reload = TIMER_AUTORELOAD_EN, // Auto-reload the counter
+    .divider = 80                       // 1 tick = 1 microsecond (80 MHz / 80)
+  };
+
+  timer_init(TIMER_GROUP_0, TIMER_1, &songConfig);
+  timer_set_counter_value(TIMER_GROUP_0, TIMER_1, 0);
+  timer_set_alarm_value(TIMER_GROUP_0, TIMER_1, SONG_INTERVAL);
+  timer_enable_intr(TIMER_GROUP_0, TIMER_1);
+  timer_isr_register(TIMER_GROUP_0, TIMER_1, songISR, NULL, ESP_INTR_FLAG_IRAM, NULL);
 }
 
-void playSoundEffect(Screen currentScreen){
+void playSoundEffect(Screen currentScreen, int score){
   playSound = true;
   controlServo = false;
-  if(currentScreen == QUESTION){
-    currentSoundBytes = questionSoundBytes;
-    currentSoundLength = questionSoundLength;
-  }
-  else if(currentScreen == CORRECT){
+  if(currentScreen == START || currentScreen == QUESTION){
+    timer_pause(TIMER_GROUP_0, TIMER_0);
+    timer_start(TIMER_GROUP_0, TIMER_1);
+  }else if(currentScreen == CORRECT){
     currentSoundBytes = correctSoundBytes;
     currentSoundLength = correctSoundLength;
+    timer_pause(TIMER_GROUP_0, TIMER_1);
+    timer_start(TIMER_GROUP_0, TIMER_0);
   }else if(currentScreen == WRONG){
     currentSoundBytes = wrongSoundBytes;
     currentSoundLength = wrongSoundLength;
+    timer_pause(TIMER_GROUP_0, TIMER_1);
+    timer_start(TIMER_GROUP_0, TIMER_0);
+  }else if(currentScreen == SCORE){
+    controlServo = score >= 3;
+    currentSoundBytes = score >= 3 ? victorySoundBytes : defeatSoundBytes;
+    currentSoundLength = score >= 3 ? victorySoundLength : defeatSoundLength;
+    timer_pause(TIMER_GROUP_0, TIMER_1);
+    timer_start(TIMER_GROUP_0, TIMER_0);
   }
-  timer_start(TIMER_GROUP_0, TIMER_0);
-}
-
-void playScoreEffects(int score){
-  playSound = true;
-  controlServo = score >= 3;
-  currentSoundBytes = score >= 3 ? victorySoundBytes : defeatSoundBytes;
-  currentSoundLength = score >= 3 ? victorySoundLength : defeatSoundLength;
-  timer_start(TIMER_GROUP_0, TIMER_0);
 }

@@ -217,6 +217,7 @@ void loop() {
   // print amount of RAM at start of each loop
   //Serial.print(F("SRAM left: "));
   //Serial.println(freeRam());
+  playSoundEffect(currentScreen, scoreCounter);
   if(currentScreen == START){
     // show animated start screen if currentScreen == START
     #ifdef DEMO_MODE
@@ -226,7 +227,6 @@ void loop() {
     #endif
   }
   else if(currentScreen == QUESTION){
-    playSoundEffect(currentScreen);
     // show question screen if currentScreen == QUESTION
     showQuestionScreen(u8g2, randomQuestions[questionCounter]);
     #ifdef DEMO_MODE
@@ -244,12 +244,10 @@ void loop() {
     questionCounter++;
   }
   else if(currentScreen == CORRECT){
-    playSoundEffect(currentScreen);
     // show animated correct screen if currentScreen == CORRECT
     showAnimatedScreen(u8g2, correctScreenFrames, correctScreenLen, false);
   }
   else if(currentScreen == WRONG){
-    playSoundEffect(currentScreen);
     // currently prints "Wrong...", no animated screen implemented due to insufficient RAM
     showAnimatedScreen(u8g2, wrongScreenFrames, wrongScreenLen, false);
     // code below used for Arduino since it doesn't have enough RAM
@@ -264,7 +262,6 @@ void loop() {
     //showAnimatedScreen(u8g2, wrongScreenFrames, wrongScreenLen, false);
   }
   else if(currentScreen == SCORE){
-    playScoreEffects(scoreCounter);
     // show final score if currentScreen == SCORE
     showScoreScreen(u8g2, scoreCounter);
     // reset scoreCounter after quiz ends

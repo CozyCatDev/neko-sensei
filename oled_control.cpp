@@ -43,8 +43,8 @@ void showQuestionScreen(U8G2_SSD1309_128X64_NONAME0_1_HW_I2C u8g2, Question ques
   unsigned long questionTimer = millis();
   // show question along with options
   while(millis() - questionTimer < QUESTION_DURATION && !getButtonPressed()){
-    int timeLeft = round((QUESTION_DURATION - (millis() - questionTimer)) / 1000);
-    int progressBarPixels = round(((millis() - questionTimer) * PROGRESS_BAR_WIDTH) / QUESTION_DURATION);
+    int timeLeft = floor((QUESTION_DURATION - (millis() - questionTimer)) / 1000);
+    int progressBarPixels = floor(((millis() - questionTimer) * PROGRESS_BAR_WIDTH) / QUESTION_DURATION);
     u8g2.firstPage();
     do{
       int cursorX = 0;

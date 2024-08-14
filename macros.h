@@ -20,8 +20,8 @@
 #define SAMPLE_RATE 8000
 
 // timer ISR interval
-#define TIMER_INTERVAL (1000000 / SAMPLE_RATE)
-#define BACKGROUND_TIMER_INTERVAL 100000
+#define SOUND_EFFECTS_INTERVAL (1000000 / SAMPLE_RATE)
+#define SONG_INTERVAL 250
 
 // time between servo actions in milliseconds
 #define SERVO_INTERVAL 2000

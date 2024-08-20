@@ -14,6 +14,6 @@ extern char getButtonPressed();
 extern char getDebouncedButton();
 extern void getRandomQuestions(Question questionPool[QUESTION_POOL_LENGTH], Question randomQuestions[QUIZ_LENGTH]);
 extern void setupTimerDACServo();
-extern void playSoundEffect(Screen currentScreen, int score);
+extern void playSoundEffect(Screen currentScreen, int score, bool newQuiz);
 
 #endif

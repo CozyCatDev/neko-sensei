@@ -4,7 +4,8 @@
 hw_timer_t* timer = NULL;
 // index for keeping track of sound byte being played
 volatile int soundIdx = 0;
-volatile uint32_t songIdx = 0;
+volatile uint32_t startSongIdx = 0;
+volatile uint32_t questionSongIdx = 0;
 volatile const uint8_t* currentSoundBytes = nullptr;
 volatile unsigned int currentSoundLength = 0;
 
@@ -12,6 +13,8 @@ bool playSound = false;
 bool controlServo = false;
 bool turnServo = false;
 unsigned long currentMillis = 0;
+
+bool onStartScreen = false;
 
 Servo servo;
 
@@ -223,9 +226,15 @@ void IRAM_ATTR songISR(void* arg){
     
     // Enable the alarm for the next period
     timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_1);
-    uint8_t sample = pgm_read_byte(&startSoundBytes[songIdx]);
-    dac_output_voltage(DAC_CHANNEL_1, sample);
-    songIdx = (songIdx + 1) % startSoundLength;
+    if(onStartScreen){
+      startSongIdx = startSongIdx == startSoundLength - 1 ? 38188 : startSongIdx + 1;
+      uint8_t sample = pgm_read_byte(&startSoundBytes[startSongIdx]);
+      dac_output_voltage(DAC_CHANNEL_1, sample);
+    }else{
+      questionSongIdx = (questionSongIdx + 1) % questionSoundLength;
+      uint8_t sample = pgm_read_byte(&questionSoundBytes[questionSongIdx]);
+      dac_output_voltage(DAC_CHANNEL_1, sample);
+    }
 }
 
 void setupTimerDACServo(){
@@ -277,13 +286,21 @@ void setupTimerDACServo(){
   timer_isr_register(TIMER_GROUP_0, TIMER_1, songISR, NULL, ESP_INTR_FLAG_IRAM, NULL);
 }
 
-void playSoundEffect(Screen currentScreen, int score){
+void playSoundEffect(Screen currentScreen, int score, bool newQuiz){
   playSound = true;
   controlServo = false;
-  if(currentScreen == START || currentScreen == QUESTION){
+  if(currentScreen == START){
+    onStartScreen = true;
+    startSongIdx = newQuiz ? 0 : startSongIdx;
     timer_pause(TIMER_GROUP_0, TIMER_0);
     timer_start(TIMER_GROUP_0, TIMER_1);
-  }else if(currentScreen == CORRECT){
+  }else if(currentScreen == QUESTION){
+    onStartScreen = false;
+    questionSongIdx = newQuiz ? 0 : questionSongIdx;
+    timer_pause(TIMER_GROUP_0, TIMER_0);
+    timer_start(TIMER_GROUP_0, TIMER_1);
+  }
+  else if(currentScreen == CORRECT){
     currentSoundBytes = correctSoundBytes;
     currentSoundLength = correctSoundLength;
     timer_pause(TIMER_GROUP_0, TIMER_1);

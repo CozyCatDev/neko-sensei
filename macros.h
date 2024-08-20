@@ -45,10 +45,13 @@
 //#define OLED_RESET -1
 //#define SCREEN_ADDRESS 0x7B
 
+#define START_SCREEN_MUSIC_START 3221
 // delay between frames
 #define FRAME_DELAY 150
 // time to wait until next screen
 #define NEXT_SCREEN_DELAY 4000
+// time to wait after score screen
+#define SCORE_SCREEN_DELAY 6000
 // time allowed per question
 #ifdef DEMO_MODE
 #define QUESTION_DURATION 4000

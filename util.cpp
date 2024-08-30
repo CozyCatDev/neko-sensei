@@ -126,26 +126,28 @@ char getDebouncedButton(){
 void getRandomQuestions(Question questionPool[QUESTION_POOL_LENGTH], Question randomQuestions[QUIZ_LENGTH]){
   // used to check if any question from pool has already been added to randomQuestions
   // TODO: change below to QUESTION_POOL_LENGTH after adding more questions
-  bool chosenIdxs[QUESTION_POOL_LENGTH] = {false};
-  static int prevChosenIdxs[QUIZ_LENGTH];
-  static int numQuiz = 0;
+  static bool chosenIdxs[QUESTION_POOL_LENGTH] = {false};
+  static int quizCounter = 0;
   int numQuestionsAdded = 0;
   int numEasyQuestionsAdded = 0;
   int numMediumQuestionsAdded = 0;
   int numHardQuestionsAdded = 0;
   bool easyFilled = false;
   bool mediumFilled = false;
+  if(quizCounter == 0){
+    for(int i = 0; i < QUIZ_LENGTH; i++){
+      chosenIdxs[i] = false;
+    }
+  }
   while(numQuestionsAdded < QUIZ_LENGTH){
     bool prevUsed = false;
     easyFilled = numEasyQuestionsAdded == NUM_EASY;
     mediumFilled = numMediumQuestionsAdded == NUM_MEDIUM;
     // TODO: change below to QUESTION_POOL_LENGTH after adding more questions
     int randomIdx = random(0, QUESTION_POOL_LENGTH);
-    Serial.print(randomIdx);
-    Serial.print(", ");
-    if(numQuiz > 0){
+    if(quizCounter > 0){
       for(int i = 0; i < QUIZ_LENGTH; i++){
-        prevUsed = (randomIdx == prevChosenIdxs[i]) || prevUsed;
+        prevUsed = chosenIdxs[randomIdx] || prevUsed;
       }
     }
     // if question has not been added to randomQuestions, add it
@@ -156,26 +158,23 @@ void getRandomQuestions(Question questionPool[QUESTION_POOL_LENGTH], Question ra
       if(numEasyQuestionsAdded < NUM_EASY && questionPool[randomIdx].difficulty == "<Easy>"){
         randomQuestions[numQuestionsAdded] = questionPool[randomIdx];
         chosenIdxs[randomIdx] = true;
-        prevChosenIdxs[numQuestionsAdded] = randomIdx;
         numEasyQuestionsAdded++;
         numQuestionsAdded++;
       }else if(easyFilled && numMediumQuestionsAdded < NUM_MEDIUM && questionPool[randomIdx].difficulty == "<Medium>"){
         randomQuestions[numQuestionsAdded] = questionPool[randomIdx];
         chosenIdxs[randomIdx] = true;
-        prevChosenIdxs[numQuestionsAdded] = randomIdx;
         numMediumQuestionsAdded++;
         numQuestionsAdded++;
       }else if(mediumFilled && numHardQuestionsAdded < NUM_HARD && questionPool[randomIdx].difficulty == "<Hard>"){
         randomQuestions[numQuestionsAdded] = questionPool[randomIdx];
         chosenIdxs[randomIdx] = true;
-        prevChosenIdxs[numQuestionsAdded] = randomIdx;
         numHardQuestionsAdded++;
         numQuestionsAdded++;
       }
       // Serial.println(randomQuestions[numQuestionsAdded].category);
     }
   }
-  numQuiz++;
+  quizCounter = (quizCounter + 1) % NUM_QUIZZES;
 }
 
 void IRAM_ATTR soundEffectsISR(void* arg){

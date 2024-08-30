@@ -67,6 +67,8 @@ bool lastQuestion = false;
 bool correctAnswer;
 // has any button been pressed?
 char buttonPressed;
+// boolean to check if next quiz is starting
+bool newQuiz = true;
 // keep track of current question
 int questionCounter = 0;
 // keep track of score
@@ -206,7 +208,6 @@ void setup() {
   u8g2.setFontPosTop();
   // set font family and font size, character has width of 5 and height of 8
   u8g2.setFont(u8g2_font_spleen5x8_mf);
-  getRandomQuestions(questions, randomQuestions);
 }
 
 // PROGRAM FLOW:
@@ -218,6 +219,10 @@ void loop() {
   //Serial.print(F("SRAM left: "));
   //Serial.println(freeRam());
   playSoundEffect(currentScreen, scoreCounter, questionCounter == 0);
+  if(newQuiz){
+    getRandomQuestions(questions, randomQuestions);
+    newQuiz = false;
+  }
   if(currentScreen == START){
     // show animated start screen if currentScreen == START
     #ifdef DEMO_MODE
@@ -268,7 +273,7 @@ void loop() {
     scoreCounter = 0;
     // reset questionCounter after quiz ends
     questionCounter = 0;
-    getRandomQuestions(questions, randomQuestions);
+    newQuiz = true;
   }
   // move on to next screen
   currentScreen = nextScreen(currentScreen, correctAnswer, lastQuestion);

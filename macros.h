@@ -70,6 +70,8 @@
 #define QUESTION_POOL_LENGTH 15
 // no. of selected questions from question pool
 #define QUIZ_LENGTH 5
+// no. of quizzes, each of length, QUIZ_LENGTH
+#define NUM_QUIZZES 2
 // no. of easy, medium and hard questions
 #define NUM_EASY 2
 #define NUM_MEDIUM 2
